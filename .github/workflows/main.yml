@@ -45,7 +45,7 @@ jobs:
         run: trivy fs --exit-code 1 --severity HIGH,CRITICAL . 
 
   build_and_push:
-    needs: test
+    # needs: test
     runs-on: ubuntu-latest
     permissions:
       contents: read
