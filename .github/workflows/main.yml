@@ -32,8 +32,9 @@ jobs:
 
       - name: Run tests
         run: |
-          source app/venv/bin/activate
-          pytest app/tests/
+          cd app
+          source venv/bin/activate
+          pytest
 
       - name: Install Trivy CLI
         run: |
