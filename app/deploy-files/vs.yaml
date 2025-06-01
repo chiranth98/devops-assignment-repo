@@ -11,9 +11,9 @@ spec:
   http:
   - match:
     - uri:
-        prefix: "/" 
+        prefix: /items
     route:
     - destination:
-        host: python-microservice
+        host: python-microservice.default.svc.cluster.local
         port:
           number: 8000
