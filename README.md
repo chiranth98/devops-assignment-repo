@@ -96,3 +96,38 @@ Also supports Kubernetes Secrets for sensitive data (DB credentials, API keys, e
 Monitoring & Logging
 
 Grafana and Kiali Dashboard for Metrics and Logs.
+
+
+____________________________________________________________
+
+Security Considerations
+IAM Roles for Service Accounts (IRSA): Securely grants EKS pods fine-grained access to AWS services like ECR and S3 without using long-lived credentials.
+
+Private Subnets + NAT Gateway: Worker nodes and system services are deployed in private subnets with no direct internet access.
+
+ALB + Security Groups: Ingress traffic is filtered through ALB security groups, and backend services are locked down with tight security group rules.
+
+Kubernetes Secrets: Application secrets are stored securely using Kubernetes Secrets with RBAC controlling access to them.
+
+EKS Nodegroup IAM Role Restrictions: Limited access using least-privilege policies (only granting permissions required for pulling images or managing volumes).
+
+Use of VPC Endpoints for the Internal Communication for the Services ( ECR, STS, S3).
+
+_____________________________________________________________________________________
+
+Cost Optimization Measures
+Spot Instances (Optional Enhancement): Architecture supports addition of spot node groups for non-critical or batch workloads using karpenter.
+
+Terraform for_each & Modules: Encourages infrastructure reuse, reducing maintenance costs and promoting DRY principles.
+
+ALB Target Group Reuse: Istio Gateway configured to reduce redundant ALB provisioning (single ALB for multiple routes/apps).
+
+S3 Lifecycle Policies: For Terraform state and backups, lifecycle rules can move older versions to infrequent access or archive tiers.
+
+CloudWatch Log Retention: Log groups are configured with limited retention to avoid unnecessary log storage costs.
+
+Right-Sized Instances: EKS node group instance types selected based on workload requirements, avoiding over-provisioning.
+
+
+
+
