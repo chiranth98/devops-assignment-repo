@@ -1,5 +1,7 @@
 fastapi
-uvicorn[standard]
-databases[asyncpg]
+uvicorn
+databases
 sqlalchemy
-pydantic
+asyncpg
+pytest
+requests
