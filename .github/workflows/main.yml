@@ -3,10 +3,10 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main1
+      - main
   pull_request:
     branches:
-      - main1
+      - main
   workflow_dispatch:
 
 env:
