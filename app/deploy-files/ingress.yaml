@@ -29,3 +29,10 @@ spec:
             name: python-microservice
             port:
               number: 80
+      - path: /openapi.json
+        pathType: Exact
+        backend:
+          service:
+            name: python-microservice
+            port:
+              number: 80
