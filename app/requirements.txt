@@ -6,3 +6,4 @@ asyncpg
 pytest
 requests
 httpx
+psycopg2
