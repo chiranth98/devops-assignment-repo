@@ -31,7 +31,7 @@ jobs:
 
       - name: Run tests
         env:
-          PYTHONPATH: ./app
+          PYTHONPATH: .
         run: |
           source app/venv/bin/activate
           pytest app/tests/
