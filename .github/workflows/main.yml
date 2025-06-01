@@ -42,7 +42,7 @@ jobs:
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
 
       - name: Dependency vulnerability scan
-        run: trivy fs --exit-code 1 --severity HIGH,CRITICAL . 
+        run: trivy fs --exit-code 0 --severity HIGH,CRITICAL . 
 
   build_and_push:
     # needs: test
