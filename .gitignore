@@ -118,4 +118,10 @@ docker-compose.override.yaml
 # IDEs
 .idea/
 *.iml
-terraform/**/.terraform/
+
+
+**/.terraform/
+
+terraform/envs/non-prod
+
+
