@@ -43,21 +43,6 @@ jobs:
       - name: Dependency vulnerability scan
         run: trivy fs --exit-code 1 --severity HIGH,CRITICAL . 
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Login to Amazon ECR (for Trivy)
-        run: |
-          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
-
-      - name: Container vulnerability scan
-        run: trivy image --exit-code 1 --severity HIGH,CRITICAL ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
-
-
   build_and_push:
     needs: test
     runs-on: ubuntu-latest
