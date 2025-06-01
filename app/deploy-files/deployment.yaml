@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: python-microservice
-          image: your-ecr-repo-url:tag
+          image: 228041306903.dkr.ecr.ap-south-1.amazonaws.com/devops-assign-dev:23
           ports:
             - containerPort: 8000
           env:

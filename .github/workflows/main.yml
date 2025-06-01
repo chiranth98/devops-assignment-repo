@@ -81,10 +81,36 @@ jobs:
     needs: build_and_push
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to Staging
-        run: echo "Deploy to staging environment logic here"
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Install kubectl
+        run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+
+      - name: Configure kubectl for EKS
+        run: |
+          aws eks --region ${{ secrets.AWS_REGION }} update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }}
+
+      - name: Update deployment image for staging
+        run: |
+          sed -i 's|image: .*|image: '"${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}"'|' k8s/deployment.yaml
+
+      - name: Deploy to staging EKS
+        run: |
+          kubectl apply -f k8s/deployment.yaml
 
   approval:
+    if: github.event_name == 'pull_request'
     needs: deploy_staging
     runs-on: ubuntu-latest
     outputs:
@@ -99,16 +125,74 @@ jobs:
           commands: approve
           issue-type: pull-request
 
-  deploy_production:
-    needs: approval
-    if: needs.approval.outputs.approved == 'true'
+  deploy_production_pr:
+    needs: [deploy_staging, approval]
+    if: github.event_name == 'pull_request' && needs.approval.outputs.approved == 'true'
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to Production
-        run: echo "Deploy to production environment logic here"
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Install kubectl
+        run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+
+      - name: Configure kubectl for EKS
+        run: |
+          aws eks --region ${{ secrets.AWS_REGION }} update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }}
+
+      - name: Update deployment image for production (PR)
+        run: |
+          sed -i 's|image: .*|image: '"${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}"'|' k8s/deployment.yaml
+
+      - name: Deploy to production EKS (PR)
+        run: |
+          kubectl apply -f k8s/deployment.yaml
+
+  deploy_production_push:
+    needs: deploy_staging
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Install kubectl
+        run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+
+      - name: Configure kubectl for EKS
+        run: |
+          aws eks --region ${{ secrets.AWS_REGION }} update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }}
+
+      - name: Update deployment image for production (push)
+        run: |
+          sed -i 's|image: .*|image: '"${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}"'|' app/deploy-files/deployment.yaml
+
+      - name: Deploy to production EKS (push)
+        run: |
+          kubectl apply -f k8s/deployment.yaml
 
   notify:
-    needs: [test, build_and_push, deploy_staging, deploy_production]
+    needs: [test, build_and_push, deploy_staging, deploy_production_pr, deploy_production_push]
     if: failure()
     runs-on: ubuntu-latest
     steps:
