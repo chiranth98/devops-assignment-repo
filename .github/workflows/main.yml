@@ -3,10 +3,10 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main1
+      - main
   pull_request:
     branches:
-      - main1
+      - main
   workflow_dispatch:
 
 env:
@@ -42,7 +42,7 @@ jobs:
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
 
       - name: Dependency vulnerability scan
-        run: trivy fs --exit-code 0 --severity HIGH,CRITICAL . 
+        run: trivy fs --exit-code 0 --severity HIGH,CRITICAL .
 
   build_and_push:
     # needs: test
@@ -193,7 +193,7 @@ jobs:
 
   notify:
     needs: [test, build_and_push, deploy_staging, deploy_production_pr, deploy_production_push]
-    if: failure()
+    if: ${{ needs.test.result == 'failure' || needs.build_and_push.result == 'failure' || needs.deploy_staging.result == 'failure' || needs.deploy_production_pr.result == 'failure' || needs.deploy_production_push.result == 'failure' }}
     runs-on: ubuntu-latest
     steps:
       - name: Slack Notification on Failure

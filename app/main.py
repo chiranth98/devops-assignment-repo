@@ -45,3 +45,7 @@ def delete_item(item_id: str):
         raise HTTPException(status_code=404, detail="Item not found")
     del db[item_id]
     return {"detail": "Item deleted"}
+
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
