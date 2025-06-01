@@ -22,3 +22,10 @@ spec:
             name: python-microservice
             port:
               number: 80
+      - path: /docs
+        pathType: Prefix
+        backend:
+          service:
+            name: python-microservice
+            port:
+              number: 80

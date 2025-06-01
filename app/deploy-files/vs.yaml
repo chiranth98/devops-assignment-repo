@@ -12,6 +12,8 @@ spec:
   - match:
     - uri:
         prefix: /items
+    - uri:
+        prefix: /docs
     route:
     - destination:
         host: python-microservice.default.svc.cluster.local
