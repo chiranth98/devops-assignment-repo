@@ -103,11 +103,11 @@ jobs:
 
       - name: Update deployment image for staging
         run: |
-          sed -i 's|image: .*|image: '"${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}"'|' k8s/deployment.yaml
+          sed -i 's|image: .*|image: '"${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}"'|' app/deploy-files/deployment.yaml
 
       - name: Deploy to staging EKS
         run: |
-          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f app/deploy-files/deployment.yaml
 
   approval:
     if: github.event_name == 'pull_request'
@@ -152,11 +152,11 @@ jobs:
 
       - name: Update deployment image for production (PR)
         run: |
-          sed -i 's|image: .*|image: '"${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}"'|' k8s/deployment.yaml
+          sed -i 's|image: .*|image: '"${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}"'|' app/deploy-files/deployment.yaml
 
       - name: Deploy to production EKS (PR)
         run: |
-          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f app/deploy-files/deployment.yaml
 
   deploy_production_push:
     needs: deploy_staging
@@ -189,7 +189,7 @@ jobs:
 
       - name: Deploy to production EKS (push)
         run: |
-          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f app/deploy-files/deployment.yaml
 
   notify:
     needs: [test, build_and_push, deploy_staging, deploy_production_pr, deploy_production_push]
